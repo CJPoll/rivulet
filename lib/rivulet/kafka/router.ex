@@ -27,10 +27,10 @@ defmodule Rivulet.Kafka.Router do
     Module.put_attribute(__CALLER__.module, :consumer_group, consumer_group)
 
     quote do
-      def child_spec(opts) do
+      def child_spec(_opts) do
         %{
           id: __MODULE__,
-          start: {__MODULE__, :start_link, [opts]},
+          start: {__MODULE__, :start_link, []},
           type: :worker,
           restart: :permanent,
           shutdown: 500
