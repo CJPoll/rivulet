@@ -8,7 +8,7 @@ In your project `mix.exs`:
 
 ```elixir
 def deps do
-  [{:rivulet, git: "git@github.com:podium/rivulet"}]
+  [{:rivulet, git: "git@github.com:cjpoll/rivulet"}]
 end
 ```
 
