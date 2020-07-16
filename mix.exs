@@ -1,26 +1,35 @@
 defmodule Rivulet.Mixfile do
   use Mix.Project
 
-
   def project do
-    [app: :rivulet,
-     version: "0.1.0",
-     elixir: "~> 1.4",
-     elixirc_paths: elixirc_paths(Mix.env),
-     build_embedded: Mix.env == :prod,
-     start_permanent: Mix.env == :prod,
-     deps: deps(),
-     dialyzer: [plt_add_deps: :app_direct, plt_add_apps: [:brod, :avro_ex], ignore_warnings: "dialyzer.ignore-warnings"],
-     aliases: aliases()]
+    [
+      app: :rivulet,
+      version: "0.1.0",
+      elixir: "~> 1.4",
+      elixirc_paths: elixirc_paths(Mix.env()),
+      build_embedded: Mix.env() == :prod,
+      start_permanent: Mix.env() == :prod,
+      deps: deps(),
+      dialyzer: [
+        plt_add_deps: :app_direct,
+        plt_add_apps: [:brod, :avro_ex],
+        ignore_warnings: "dialyzer.ignore-warnings"
+      ],
+      aliases: aliases()
+    ]
   end
 
   def application do
-    if Mix.env == :test do
-      [applications: [:mix, :logger, :httpoison, :poison, :hackney, :meck],
-       mod: {Rivulet.Application, []}]
+    if Mix.env() == :test do
+      [
+        applications: [:mix, :logger, :httpoison, :poison, :hackney, :meck],
+        mod: {Rivulet.Application, []}
+      ]
     else
-      [applications: [:mix, :logger, :httpoison, :brod, :poison, :hackney],
-       mod: {Rivulet.Application, []}]
+      [
+        applications: [:mix, :logger, :httpoison, :brod, :poison, :hackney],
+        mod: {Rivulet.Application, []}
+      ]
     end
   end
 
@@ -35,16 +44,17 @@ defmodule Rivulet.Mixfile do
   defp elixirc_paths(_), do: ["lib"]
 
   defp deps do
-    [{:dialyxir, "~> 0.5.0", only: [:dev, :test], runtime: false},
-     {:avro_ex, "~> 0.1.0-beta.5"},
-     {:brod, "~> 3.3.1"},
-     {:ecto, "~> 3.0", override: true},
-     {:ecto_sql, "~> 3.0"},
-     {:elastix, "~> 0.5.0"},
-     {:httpoison, ">= 1.0.0"},
-     {:meck, "~> 0.8.7", only: [:test]},
-     {:jiffy, "0.15.1"},
-     {:uuid, "~> 1.1.8"}
+    [
+      {:dialyxir, "~> 0.5.0", only: [:dev, :test], runtime: false},
+      {:avro_ex, "~> 0.1.0-beta.5"},
+      {:brod, "~> 3.14.0"},
+      {:ecto, "~> 3.0", override: true},
+      {:ecto_sql, "~> 3.0"},
+      {:elastix, "~> 0.5.0"},
+      {:httpoison, ">= 1.0.0"},
+      {:meck, "~> 0.8.7", only: [:test]},
+      {:jiffy, "0.15.1"},
+      {:uuid, "~> 1.1.8"}
     ]
   end
 end

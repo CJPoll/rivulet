@@ -2,18 +2,26 @@ defmodule Rivulet.Application do
   use Application
   require Logger
 
+  alias Rivulet.Consumer.Config
+
   def start(_, _) do
     import Supervisor.Spec
 
     configure_kafka()
     configure_schema_registry()
 
+    test_consumer_config = %Config{
+      client_id: Rivulet.client_name!(),
+      consumer_group_name: "rivulet-consumer-group",
+      topics: ["test-topic"]
+    }
+
     children = [
       supervisor(Registry, [:unique, Rivulet.Registry]),
       worker(Rivulet.Avro.Cache, []),
       supervisor(Task.Supervisor, [[name: Task.Supervisor, restart: :transient]]),
-      #worker(Rivulet.TestRouter, []),
-      #worker(Rivulet.TestConsumer, [test_consumer_config])
+      # worker(Rivulet.TestRouter, []),
+      worker(Rivulet.TestConsumer, [test_consumer_config])
     ]
 
     opts = [strategy: :one_for_one]
@@ -32,18 +40,22 @@ defmodule Rivulet.Application do
       |> kafka_producer_config()
 
     if System.get_env("MIX_ENV") != "test" do
-      client_name = Rivulet.client_name
+      client_name = Rivulet.client_name()
 
       unless is_atom(client_name) do
         raise "`config :rivulet, client_name: client_name` must be an atom, not a string"
       end
 
       :ok =
-        :brod.start_client(kafka_hosts, client_name, _client_config=[
-          auto_start_producers: true,
-          allow_topic_auto_creation: false,
-          default_producer_config: producer_config
-        ])
+        :brod.start_client(
+          kafka_hosts,
+          client_name,
+          _client_config = [
+            auto_start_producers: true,
+            allow_topic_auto_creation: false,
+            default_producer_config: producer_config
+          ]
+        )
     else
       Logger.info("Test Environment detected - not starting :brod")
     end
@@ -51,19 +63,27 @@ defmodule Rivulet.Application do
 
   def kafka_producer_config(nil) do
     [
-      required_acks: 1, # by default this is -1, meaning "all", within :brod (options are 0, 1, -1)
-      ack_timeout: 10000, # the max number of time the producer should wait to receive a response that message was received by all required insync replicas before timing out. default is: 10000ms
-      max_retries: 30, # by default this is 3 within :brod, -1 means "retry indefinitely"
-      retry_backoff_ms: 1000 # by default this is 500ms within :brod
+      # by default this is -1, meaning "all", within :brod (options are 0, 1, -1)
+      required_acks: 1,
+      # the max number of time the producer should wait to receive a response that message was received by all required insync replicas before timing out. default is: 10000ms
+      ack_timeout: 10000,
+      # by default this is 3 within :brod, -1 means "retry indefinitely"
+      max_retries: 30,
+      # by default this is 500ms within :brod
+      retry_backoff_ms: 1000
     ]
   end
 
   def kafka_producer_config(custom_config) do
     default_producer_config = [
-      required_acks: 1, # by default this is -1, meaning "all", within :brod (options are 0, 1, -1)
-      ack_timeout: 10000, # the max number of time the producer should wait to receive a response that message was received by all required insync replicas before timing out. default is: 10000ms
-      max_retries: 30, # by default this is 3 within :brod, -1 means "retry indefinitely"
-      retry_backoff_ms: 1000 # by default this is 500ms within :brod
+      # by default this is -1, meaning "all", within :brod (options are 0, 1, -1)
+      required_acks: 1,
+      # the max number of time the producer should wait to receive a response that message was received by all required insync replicas before timing out. default is: 10000ms
+      ack_timeout: 10000,
+      # by default this is 3 within :brod, -1 means "retry indefinitely"
+      max_retries: 30,
+      # by default this is 500ms within :brod
+      retry_backoff_ms: 1000
     ]
 
     Enum.reduce(Keyword.keys(custom_config), default_producer_config, fn k, acc ->
@@ -89,25 +109,29 @@ defmodule Rivulet.Application do
     case Application.get_env(:rivulet, :avro_schema_registry_uri) do
       {:system, var} ->
         Application.put_env(:rivulet, :avro_schema_registry_uri, System.get_env(var))
+
       val when is_binary(val) ->
         :ok
+
       %URI{} ->
         :ok
+
       any ->
-        Logger.warn("Got value: #{inspect any} for schema registry url")
+        Logger.warn("Got value: #{inspect(any)} for schema registry url")
     end
   end
 
   defp kafka_hosts(string) do
     string
     |> String.split(",")
-    |> Enum.map(fn(host_string) ->
-         case String.split(host_string, ":") do
-           [host, port] ->
-             {String.to_atom(host), String.to_integer(port)}
-           [host] ->
-             {String.to_atom(host), 9092}
-         end
-       end)
+    |> Enum.map(fn host_string ->
+      case String.split(host_string, ":") do
+        [host, port] ->
+          {String.to_atom(host), String.to_integer(port)}
+
+        [host] ->
+          {String.to_atom(host), 9092}
+      end
+    end)
   end
 end

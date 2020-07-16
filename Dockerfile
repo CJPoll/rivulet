@@ -14,12 +14,6 @@ COPY config/ /app/config/
 RUN mix deps.get
 RUN mix deps.compile
 
-COPY dialyzer.ignore-warnings /app/
-RUN mix dialyzer --plt
-
-COPY codeship-services.yml /app/
-COPY codeship-steps.yml /app/
-
 COPY bin/ /app/bin/
 COPY priv/ /app/priv/
 COPY test/ /app/test/
