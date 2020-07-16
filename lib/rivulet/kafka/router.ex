@@ -99,6 +99,9 @@ defmodule Rivulet.Kafka.Router do
         {:transformer, _, [transformer, [do: publishes]]} ->
           [:route, Macro.expand_once(transformer, __ENV__), publishes]
 
+        {:transformer, _, [transformer]} ->
+          [:route, Macro.expand_once(transformer, __ENV__), []]
+
         {:publish_to, _, [topic, config]} ->
           partition_strategy = Keyword.get(config, :partition, :key)
 

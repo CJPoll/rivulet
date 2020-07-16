@@ -18,9 +18,8 @@ defmodule Rivulet.Application do
 
     children = [
       supervisor(Registry, [:unique, Rivulet.Registry]),
-      worker(Rivulet.Avro.Cache, []),
       supervisor(Task.Supervisor, [[name: Task.Supervisor, restart: :transient]]),
-      # worker(Rivulet.TestRouter, []),
+      worker(Rivulet.TestRouter, []),
       worker(Rivulet.TestConsumer, [test_consumer_config])
     ]
 
@@ -43,7 +42,7 @@ defmodule Rivulet.Application do
       client_name = Rivulet.client_name()
 
       unless is_atom(client_name) do
-        raise "`config :rivulet, client_name: client_name` must be an atom, not a string"
+        raise "`config :rivulet, default_client: client_name` must be an atom, not a string"
       end
 
       :ok =
