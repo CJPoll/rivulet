@@ -5,8 +5,3 @@ config :rivulet,
   kafka_brokers: [rivulet_kafka_1: 9092],
   default_client: :"rivulet-client-#{System.get_env("HOSTNAME")}",
   json_handler: Rivulet.JSON.JiffyHandler
-
-# Configure elastix
-config :elastix,
-  poison_options: [keys: :atoms],
-  httpoison_options: [hackney: [pool: :elastix_pool]]
