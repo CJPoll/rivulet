@@ -31,7 +31,7 @@ defmodule Rivulet.Application do
   defp configure_kafka do
     Logger.debug("Configuring Kafka")
 
-    kafka_hosts = kafka_brokers()
+    kafka_hosts = bootstrap_servers()
 
     producer_config =
       :rivulet
@@ -91,16 +91,16 @@ defmodule Rivulet.Application do
     end)
   end
 
-  def kafka_brokers do
+  def bootstrap_servers do
     config = Application.get_all_env(:rivulet)
 
     if Keyword.get(config, :dynamic_hosts) do
-      case System.get_env("KAFKA_HOSTS") do
-        nil -> Logger.error("KAFKA_HOSTS not set")
+      case System.get_env("BOOTSTRAP_SERVERS") do
+        nil -> Logger.error("BOOTSTRAP_SERVERS not set")
         value -> kafka_hosts(value)
       end
     else
-      Application.get_env(:rivulet, :kafka_brokers)
+      Application.get_env(:rivulet, :bootstrap_servers)
     end
   end
 
