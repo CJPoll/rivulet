@@ -22,12 +22,12 @@ defmodule Rivulet.Mixfile do
   def application do
     if Mix.env() == :test do
       [
-        applications: [:mix, :logger, :httpoison, :poison, :hackney, :meck],
+        applications: [:mix, :logger, :meck],
         mod: {Rivulet.Application, []}
       ]
     else
       [
-        applications: [:mix, :logger, :httpoison, :brod, :poison, :hackney],
+        applications: [:mix, :logger, :brod],
         mod: {Rivulet.Application, []}
       ]
     end
