@@ -1,18 +1,21 @@
 defmodule Rivulet.Kafka.Router.Funcs do
   require Logger
-  alias Rivulet.Kafka.Publisher.Message
+
+  alias Rivulet.Kafka.Consumer.Config
+  alias Rivulet.Kafka.Producer.Message
+  alias Rivulet.Kafka.{Client, Consumer, Producer}
 
   defp to_list(list) when is_list(list), do: list
   defp to_list(other), do: [other]
 
   def start_link(module, consumer_group, source_topics) do
-    config = %Rivulet.Consumer.Config{
-      client_id: Rivulet.client_name(),
+    config = %Config{
+      client_id: Client.default_name(),
       consumer_group_name: consumer_group,
       topics: source_topics,
       group_config: [
         offset_commit_policy: :commit_to_kafka_v2,
-        offset_commit_interval_secons: 1
+        offset_commit_interval_seconds: 1
       ],
       consumer_config: [
         begin_offset: :earliest,
@@ -22,13 +25,13 @@ defmodule Rivulet.Kafka.Router.Funcs do
 
     Logger.info("Configuration for #{module}: #{inspect(config)}")
 
-    Rivulet.Consumer.start_link(module, config)
+    Consumer.start_link(module, config)
   end
 
   defp to_publish(nil), do: nil
 
   defp to_publish({k, v}) when is_binary(k) and is_binary(v) do
-    %Rivulet.Kafka.Publisher.Message{
+    %Message{
       key: k,
       value: v,
       encoding_strategy: :raw,
@@ -72,7 +75,7 @@ defmodule Rivulet.Kafka.Router.Funcs do
         |> Enum.map(fn message ->
           to_message(message, topic, partition_strategy)
         end)
-        |> Rivulet.Kafka.Publisher.publish_async()
+        |> Producer.produce_async()
     end)
   end
 

@@ -1,19 +1,15 @@
-defmodule Rivulet.TestRouter do
+defmodule TestApp.TestRouter do
   @moduledoc false
   use Rivulet.Kafka.Router,
     consumer_group: "test-rivulet"
 
   defstream "test-log" do
     transformer Rivulet.TestTransformer do
-      publish_to("test-log-2",
-        partition: :key
-      )
+      publish_to("test-log-2", partition: :key)
     end
 
     transformer Rivulet.TestTransformer2 do
-      publish_to("test-log-2",
-        partition: :key
-      )
+      publish_to("test-log-2", partition: :key)
     end
   end
 

@@ -44,4 +44,9 @@ defmodule Rivulet.Kafka.Consumer.Message do
       decoded_value: nil
     }
   end
+
+  defguard is_message(message) when :erlang.map_get(:__struct__, message) == __MODULE__
+
+  def message?(message) when is_message(message), do: true
+  def message?(_), do: false
 end

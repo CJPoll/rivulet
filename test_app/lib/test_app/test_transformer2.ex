@@ -1,4 +1,4 @@
-defmodule Rivulet.TestTransformer2 do
+defmodule TestApp.TestTransformer2 do
   use Rivulet.Transformer
 
   def handle_message(%Rivulet.Kafka.Consumer.Message{} = m) do

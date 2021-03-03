@@ -1,15 +1,15 @@
 defmodule Rivulet.Transformer do
   defmacro __using__(_) do
     quote do
-      alias unquote(__MODULE__)
+      @behaviour unquote(__MODULE__)
     end
   end
 
-  alias Rivulet.Kafka.Publisher.Message
+  alias Rivulet.Kafka.Producer.Message
 
   @type key :: binary
   @type value :: binary
 
-  @callback handle_message(Message.t)
-  :: nil | {key, value} | [{key, value} | nil]
+  @callback handle_message(Message.t()) ::
+              nil | {key, value} | [{key, value} | nil]
 end

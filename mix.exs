@@ -5,14 +5,13 @@ defmodule Rivulet.Mixfile do
     [
       app: :rivulet,
       version: "0.1.0",
-      elixir: "~> 1.4",
-      elixirc_paths: elixirc_paths(Mix.env()),
+      elixir: "~> 1.10",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       dialyzer: [
         plt_add_deps: :app_direct,
-        plt_add_apps: [:brod, :avro_ex],
+        plt_add_apps: [:brod],
         ignore_warnings: "dialyzer.ignore-warnings"
       ],
       aliases: aliases()
@@ -22,13 +21,13 @@ defmodule Rivulet.Mixfile do
   def application do
     if Mix.env() == :test do
       [
-        applications: [:mix, :logger, :meck],
-        mod: {Rivulet.Application, []}
+        applications: [:mix, :logger, :meck]
+        # mod: {Rivulet.Application, []}
       ]
     else
       [
-        applications: [:mix, :logger, :brod],
-        mod: {Rivulet.Application, []}
+        applications: [:mix, :logger, :brod]
+        # mod: {Rivulet.Application, []}
       ]
     end
   end
@@ -40,16 +39,10 @@ defmodule Rivulet.Mixfile do
     ]
   end
 
-  defp elixirc_paths(:test), do: ["lib", "test/support"]
-  defp elixirc_paths(_), do: ["lib"]
-
   defp deps do
     [
       {:dialyxir, "~> 0.5.0", only: [:dev, :test], runtime: false},
-      {:brod, "~> 3.14.0"},
-      {:meck, "~> 0.8.7", only: [:test]},
-      {:jiffy, "0.15.1"},
-      {:uuid, "~> 1.1.8"}
+      {:brod, "~> 3.15.0"}
     ]
   end
 end
