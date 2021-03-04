@@ -2,6 +2,6 @@ defmodule TestApp.TestTransformer do
   use Rivulet.Transformer
 
   def handle_message(%Rivulet.Kafka.Consumer.Message{} = m) do
-    [nil, {m.raw_key, m.raw_value}]
+    [nil, {m.key, m.value}]
   end
 end

@@ -18,12 +18,11 @@ defmodule Rivulet.Kafka.Producer do
           | iodata
           | :leader_not_available
 
-  @spec produce_async(Partition.topic(), partition_strategy, key, value) ::
+  @spec produce_async(Client.t(), Partition.topic(), partition_strategy, key, value) ::
           produce_return
           | {:error, :schema_not_found}
           | {:error, term}
-  def produce_async(topic, partition \\ :hash, key, message) do
-    client = Client.default_name()
+  def produce_async(client \\ Client.default_name(), topic, partition \\ :hash, key, message) do
     :brod.produce(client, topic, partition, key, message)
   end
 
