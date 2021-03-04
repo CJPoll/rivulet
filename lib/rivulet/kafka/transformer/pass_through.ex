@@ -1,7 +1,9 @@
 defmodule Rivulet.Transformer.PassThrough do
   use Rivulet.Transformer
 
-  def handle_message(%Rivulet.Kafka.Consumer.Message{} = m) do
-    {m.raw_key, m.raw_value}
+  alias Rivulet.Kafka.Consumer.Message
+
+  def handle_message(%Message{} = m) do
+    {m.key, m.value}
   end
 end

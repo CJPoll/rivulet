@@ -1,6 +1,4 @@
 defmodule Rivulet.Kafka.Consumer.Message do
-  alias Rivulet.Avro
-
   require Record
   import Record
 
@@ -10,21 +8,17 @@ defmodule Rivulet.Kafka.Consumer.Message do
   )
 
   defstruct offset: nil,
-            raw_key: nil,
-            raw_value: nil,
-            decoded_key: nil,
-            decoded_value: nil,
-            key_schema: nil,
-            value_schema: nil
+            key: nil,
+            value: nil,
+            failed?: false,
+            failed_reason: nil
 
   @type t :: %__MODULE__{
           offset: non_neg_integer,
-          raw_key: binary,
-          raw_value: binary,
-          key_schema: Avro.schema() | nil,
-          value_schema: Avro.schema() | nil,
-          decoded_key: term | nil,
-          decoded_value: term | nil
+          key: binary,
+          value: binary,
+          failed?: boolean,
+          failed_reason: nil | term
         }
 
   def from_wire_message(messages) when is_list(messages) do
@@ -38,10 +32,8 @@ defmodule Rivulet.Kafka.Consumer.Message do
   def from_wire_message(msg) when is_record(msg, :kafka_message) do
     %__MODULE__{
       offset: kafka_message(msg, :offset),
-      raw_key: kafka_message(msg, :key),
-      raw_value: kafka_message(msg, :value),
-      decoded_key: nil,
-      decoded_value: nil
+      key: kafka_message(msg, :key),
+      value: kafka_message(msg, :value)
     }
   end
 
@@ -49,4 +41,14 @@ defmodule Rivulet.Kafka.Consumer.Message do
 
   def message?(message) when is_message(message), do: true
   def message?(_), do: false
+
+  def failed(%__MODULE__{} = message, reason) do
+    %__MODULE__{message | failed?: true, failed_reason: reason}
+  end
+
+  def failed?(%__MODULE__{failed?: failed}), do: failed
+
+  def update_data(%__MODULE__{} = message, data) do
+    %__MODULE__{message | value: data}
+  end
 end

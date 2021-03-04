@@ -1,8 +1,10 @@
 defmodule Rivulet.Transformer.Inspect do
   use Rivulet.Transformer
 
-  def handle_message(%Rivulet.Kafka.Consumer.Message{} = m) do
-    IO.inspect({m.raw_key, m.raw_value})
+  alias Rivulet.Kafka.Consumer.Message
+
+  def handle_message(%Message{} = m) do
+    IO.inspect({m.key, m.value})
     nil
   end
 end

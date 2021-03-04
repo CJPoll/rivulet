@@ -45,6 +45,7 @@ defmodule Rivulet.Kafka.Consumer2 do
 
   defmacro __using__(_) do
     quote do
+      @behaviour unquote(__MODULE__)
       def child_spec(args) do
         %{
           id: __MODULE__,
