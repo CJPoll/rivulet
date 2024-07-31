@@ -24,13 +24,15 @@ defmodule Rivulet.Kafka.Consumer2 do
 
   defmodule State do
     alias Rivulet.Kafka.Partition
-    defstruct [:callback_module, :partition, :tracked_state]
 
-    def new(callback_module, %Partition{} = partition, tracked_state) do
+    defstruct [:callback_module, :partition, :tracked_state, :extra]
+
+    def new(callback_module, %Partition{} = partition, tracked_state, extra \\ []) do
       %__MODULE__{
         callback_module: callback_module,
         partition: partition,
-        tracked_state: tracked_state
+        tracked_state: tracked_state,
+        extra: extra
       }
     end
 
@@ -46,6 +48,10 @@ defmodule Rivulet.Kafka.Consumer2 do
   defmacro __using__(_) do
     quote do
       @behaviour unquote(__MODULE__)
+
+      alias Rivulet.Kafka.Consumer.Message
+      alias Rivulet.Kafka.Partition
+
       def child_spec(args) do
         %{
           id: __MODULE__,
@@ -92,7 +98,7 @@ defmodule Rivulet.Kafka.Consumer2 do
       ) do
     {:ok, state} = apply(callback_module, :init, [extra])
     partition = Partition.new(topic, partition)
-    state = State.new(callback_module, partition, state)
+    state = State.new(callback_module, partition, state, extra)
     {:ok, state}
   end
 

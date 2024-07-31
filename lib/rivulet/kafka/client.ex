@@ -1,8 +1,15 @@
 defmodule Rivulet.Kafka.Client do
   alias Rivulet.Kafka.Producer
 
-  defdelegate start_client(bootstrap_servers, name, config),
-    to: :brod
+  def child_spec(args) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, args}
+    }
+  end
+
+  defdelegate start_link(bootstrap_servers, name, config), to: :brod_client
+  defdelegate start_client(bootstrap_servers, name, config), to: :brod
 
   @spec default_name() :: term | nil
   def default_name do

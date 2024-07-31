@@ -48,7 +48,15 @@ defmodule Rivulet.Kafka.Consumer.Message do
 
   def failed?(%__MODULE__{failed?: failed}), do: failed
 
-  def update_data(%__MODULE__{} = message, data) do
-    %__MODULE__{message | value: data}
+  def key(%__MODULE__{key: key}), do: key
+
+  def key(%__MODULE__{} = message, key) do
+    %__MODULE__{message | key: key}
+  end
+
+  def value(%__MODULE__{value: value}), do: value
+
+  def value(%__MODULE__{} = message, value) do
+    %__MODULE__{message | value: value}
   end
 end

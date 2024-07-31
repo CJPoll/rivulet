@@ -18,15 +18,51 @@ defmodule Rivulet.Kafka.Producer do
           | iodata
           | :leader_not_available
 
+  @spec produce_sync(Client.t(), Partition.topic(), partition_strategy, key, value) ::
+          :ok | {:error, term}
+  def produce_sync(
+        client \\ Client.default_name(),
+        topic,
+        partition_strategy \\ :hash,
+        key,
+        value
+      ) do
+    :brod.produce_sync(client, topic, partition_strategy, key, value)
+  end
+
+  @spec produce_sync([Message.t()]) :: [{:ok, term} | {:error, term}]
+  def produce_sync(client \\ Client.default_name(), messages) do
+    messages
+    |> Enum.map(fn message ->
+      produce_async(client, message)
+    end)
+    |> Enum.map(fn
+      {:ok, call_ref} ->
+        :brod.sync_produce_request(call_ref)
+
+      {:error, _reason} = err ->
+        Logger.error("Bulk producing failed: #{inspect(err)}")
+        raise "Bulk produce failed for reason: #{inspect(err)}"
+    end)
+  end
+
   @spec produce_async(Client.t(), Partition.topic(), partition_strategy, key, value) ::
           produce_return
           | {:error, :schema_not_found}
           | {:error, term}
-  def produce_async(client \\ Client.default_name(), topic, partition \\ :hash, key, message) do
-    :brod.produce(client, topic, partition, key, message)
+  def produce_async(
+        client \\ Client.default_name(),
+        topic,
+        partition_strategy \\ :hash,
+        key,
+        message
+      ) do
+    :brod.produce(client, topic, partition_strategy, key, message)
   end
 
-  def produce_async(%Message{
+  def produce_async(client \\ Client.default_name(), message)
+
+  def produce_async(client, %Message{
         topic: topic,
         key: key,
         value: value,
@@ -34,19 +70,21 @@ defmodule Rivulet.Kafka.Producer do
         partition: partition
       }) do
     partition = partition || partition_strategy
-    produce_async(topic, partition, key, value)
+    produce_async(client, topic, partition, key, value)
   end
 
   @spec produce_async([Message.t()]) :: [{:ok, term} | {:error, term}]
-  def produce_async(messages) do
+  def produce_async(client, messages) do
     messages
-    |> Enum.map(&produce_async/1)
+    |> Enum.map(fn message ->
+      produce_async(client, message)
+    end)
     |> Enum.map(fn
       {:ok, call_ref} ->
         {:ok, call_ref}
 
       {:error, _reason} = err ->
-        Logger.error("Bulk produceing failed: #{inspect(err)}")
+        Logger.error("Bulk producing failed: #{inspect(err)}")
         raise "Bulk produce failed for reason: #{inspect(err)}"
     end)
   end

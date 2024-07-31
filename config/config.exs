@@ -1,4 +1,4 @@
-use Mix.Config
+import Config
 
 config :rivulet,
   avro_schema_registry_uri: %URI{scheme: "http", host: "rivulet_schema-registry_1", port: 8081},
